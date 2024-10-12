@@ -1,0 +1,13 @@
+name: "user-web"
+port: 8021
+user_srv:
+  host: '127.0.0.1'
+  port: 50051
+jwt:
+  key: 'iusd7Djsdkf21039@7873487FHJSDGfj'
+sms:
+  key: ""
+  secret: ""
+redis:
+  host: "39.102.215.201"
+  port: 6379
