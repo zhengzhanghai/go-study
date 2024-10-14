@@ -1,10 +1,10 @@
 mysql:
   host: '39.102.215.201'
   port: 3306
-  user: 'root'
+  user: 'zzh'
   password: '123456'
   db: 'shop_user_srv'
 
 consul:
-  host: ''
-  port: 333
+  host: '39.102.215.201'
+  port: 6500
