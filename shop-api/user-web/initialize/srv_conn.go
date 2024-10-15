@@ -28,11 +28,6 @@ func InitSrvConn() {
 		return
 	}
 
-	if len(data) == 0 {
-		panic("没有发现user-srv服务")
-		return
-	}
-
 	ip := ""
 	port := 0
 	for key, value := range data {
@@ -40,6 +35,11 @@ func InitSrvConn() {
 		ip = value.Address
 		port = value.Port
 		break
+	}
+
+	if ip == "" {
+		zap.S().Error("没有发现用户微服务")
+		return
 	}
 
 	zap.S().Info(fmt.Sprintf("用户微服务 ip: %s, port: %d", ip, port))

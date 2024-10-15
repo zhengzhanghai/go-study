@@ -41,12 +41,17 @@ func main() {
 		})
 	}
 
+	RegisterService()
+
 	port := global.ServerConfig.Port
 	zap.S().Info("启动服务器，端口: ", port)
 	if err := Router.Run(fmt.Sprintf(":%d", port)); err != nil {
 		zap.S().Panic("启动失败", err.Error())
 	}
+}
 
+func RegisterService() {
+	Register("10.0.177.16", 8021, "user-web", []string{"user", "web", "api"}, "user-web")
 }
 
 // 注册服务
@@ -61,12 +66,12 @@ func Register(address string, port int, name string, tags []string, id string) {
 	}
 
 	// 生成一个检查对象
-	check := &api.AgentServiceCheck{
-		HTTP:                           "http://127.0.0.1:8021/health",
-		Timeout:                        "5s",
-		Interval:                       "5s",
-		DeregisterCriticalServiceAfter: "10s",
-	}
+	//check := &api.AgentServiceCheck{
+	//	HTTP:                           "http://10.0.177.16:8021/health",
+	//	Timeout:                        "5s",
+	//	Interval:                       "5s",
+	//	DeregisterCriticalServiceAfter: "10s",
+	//}
 	// 生成一个注册对象
 	registration := new(api.AgentServiceRegistration)
 	registration.Address = address
@@ -74,7 +79,7 @@ func Register(address string, port int, name string, tags []string, id string) {
 	registration.Name = name
 	registration.ID = id
 	registration.Tags = tags
-	registration.Check = check
+	//registration.Check = check
 	err = client.Agent().ServiceRegister(registration)
 	if err != nil {
 		panic(err)
