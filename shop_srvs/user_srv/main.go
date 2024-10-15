@@ -56,12 +56,12 @@ func RegisterService() {
 	}
 
 	// 生成一个检查对象
-	check := &api.AgentServiceCheck{
-		GRPC:                           "10.0.177.16:50051",
-		Timeout:                        "5s",
-		Interval:                       "5s",
-		DeregisterCriticalServiceAfter: "10s",
-	}
+	//check := &api.AgentServiceCheck{
+	//	GRPC:                           "10.0.177.16:50051",
+	//	Timeout:                        "5s",
+	//	Interval:                       "5s",
+	//	DeregisterCriticalServiceAfter: "10s",
+	//}
 	// 生成一个注册对象
 	registration := new(api.AgentServiceRegistration)
 	registration.Address = "10.0.177.16"
@@ -69,7 +69,7 @@ func RegisterService() {
 	registration.Name = global.ServerConfig.Name
 	registration.ID = global.ServerConfig.Name
 	registration.Tags = []string{"user", "srv", "shop"}
-	registration.Check = check
+	//registration.Check = check
 	err = client.Agent().ServiceRegister(registration)
 	if err != nil {
 		panic(err)
