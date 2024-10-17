@@ -6,12 +6,16 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/hashicorp/consul/api"
+	_ "github.com/mbobakov/grpc-consul-resolver" // GRPC负载均衡
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"os"
+	"os/signal"
 	"shop-api/user-web/global"
 	"shop-api/user-web/initialize"
 	"shop-api/user-web/utils"
 	validator2 "shop-api/user-web/validator"
+	"syscall"
 )
 
 func main() {
@@ -53,28 +57,39 @@ func main() {
 		})
 	}
 
-	RegisterService()
+	client, serviceId := RegisterService()
 
 	port := global.ServerConfig.Port
 	zap.S().Info("启动服务器，端口: ", port)
-	if err := Router.Run(fmt.Sprintf(":%d", port)); err != nil {
-		zap.S().Panic("启动失败", err.Error())
+	go func() {
+		if err := Router.Run(fmt.Sprintf(":%d", port)); err != nil {
+			zap.S().Panic("启动失败", err.Error())
+		}
+	}()
+
+	// 接收终止信号，在consul中注销
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	if err := client.Agent().ServiceDeregister(serviceId); err != nil {
+		zap.S().Error("注销失败")
 	}
+	zap.S().Info("注销成功")
 }
 
-func RegisterService() {
-	Register("10.0.177.16", 8021, "user-web", []string{"user", "web", "api"}, "user-web")
+func RegisterService() (*api.Client, string) {
+	return Register("10.0.177.16", 8021, "user-web", []string{"user", "web", "api"}, "user-web")
 }
 
 // 注册服务
-func Register(address string, port int, name string, tags []string, id string) {
+func Register(address string, port int, name string, tags []string, id string) (*api.Client, string) {
 	cfg := api.DefaultConfig()
 	cfg.Address = "39.102.215.201:8500"
 
 	client, err := api.NewClient(cfg)
 	if err != nil {
 		panic(err)
-		return
+		return client, ""
 	}
 
 	// 生成一个检查对象
@@ -96,7 +111,7 @@ func Register(address string, port int, name string, tags []string, id string) {
 	if err != nil {
 		panic(err)
 	}
-
+	return client, id
 }
 
 func AllServices() {

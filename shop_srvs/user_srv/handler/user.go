@@ -5,6 +5,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"github.com/anaskhan96/go-password-encoder"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -51,6 +52,7 @@ func Paginate(page int, size int) func(db *gorm.DB) *gorm.DB {
 }
 
 func (s *UserService) GetUserList(ctx context.Context, req *proto.PageInfo) (*proto.UserListResponse, error) {
+	zap.S().Info("请求用户列表")
 	var users []model.User
 	//result := global.DB.Model(&model.User{}).Find(&users)
 	result := global.DB.Find(&users)
